@@ -231,7 +231,7 @@ function splitIntoClusters(points: LabeledPoint[]): Map<number, Point[]> {
 }
 
 /* ────────────────────── Helper: jitter points ────────────────────── */
-const JITTER_STEP = 0.12; // adjust if needed
+const JITTER_STEP = 0.18; // adjust if needed
 function jitterPoint(p: Point, offsetIndex: number): Point {
   // spread offsets on a 3x3 grid centred at 0
   const dxFactor = (offsetIndex % 3) - 1; // -1,0,1
@@ -354,8 +354,7 @@ const AdvancedLesson: React.FC = () => {
         bgcolor: "#e9e9e9",
         borderRadius: 6,
         border: "2px solid #0b2538",
-        width: "100%",
-        maxWidth: 1200,
+        width: "1300px",
         mx: "auto",
       }}
     >

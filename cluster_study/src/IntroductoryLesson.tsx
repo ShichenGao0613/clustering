@@ -317,8 +317,7 @@ const IntroductoryLesson: React.FC<IntroductoryLessonProps> = ({
         bgcolor: "#e9e9e9",
         borderRadius: 6,
         border: "2px solid #0b2538",
-        width: "100%",
-        maxWidth: 1200,
+        width: "1300px",
         mx: "auto",
       }}
     >

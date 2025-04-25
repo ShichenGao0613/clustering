@@ -28,16 +28,31 @@ import "katex/dist/katex.min.css";
 import { BlockMath, InlineMath } from "react-katex";
 
 /**
- * IntermediateLesson – K-Means & DBSCAN Tutorial (updated + extended DBSCAN section)
+ * IntermediateLesson – K-Means & DBSCAN Tutorial
+ * Adjusted so that every section keeps a fixed size without scrollbars and
+ * the coordinate axes appear slightly smaller.
  */
 
 const NAV_ITEMS = ["Dataset", "Method", "Metrics"] as const;
+
+// ──────────── NEW CONSTANTS ────────────
+/** Fixed height for each content panel so the size never changes while toggling */
+const SECTION_HEIGHT = 1040; // px – matches the previous minHeight to avoid layout shift
+
+/** Proportional shrink factor applied to chart width so the axes look smaller. */
+const CHART_WIDTH_PERCENT = "90%"; // 100 % → 90 %
+
+// ───────────────────────────────────────
+
+// ... (rest of the imports and constant definitions remain unchanged)
 
 type Section = (typeof NAV_ITEMS)[number];
 interface IntermediateLessonProps {
   /** Called by parent when user completes all quiz levels */
   onComplete?: () => void;
 }
+// ... existing type declarations
+
 type MethodKey = "KMeans" | "DBSCAN";
 
 type DatasetKey = "dataset1" | "dataset2";
@@ -51,8 +66,116 @@ interface Point {
 interface Cluster {
   points: Point[];
 }
+const KMEANS_CONTENT = (
+  <Fragment>
+    <Typography variant="subtitle2" gutterBottom>
+      K-Means Overview
+    </Typography>
+    <Typography variant="h5" gutterBottom sx={{ pl: 2 }}>
+      • K-Means is an <strong>unsupervised</strong> clustering algorithm that
+      partitions data points into <InlineMath math="k" /> clusters.
+    </Typography>
+    <Typography variant="h5" gutterBottom sx={{ pl: 2 }}>
+      • It groups data points by repeatedly assigning each point to the
+      nearest cluster centroid—typically measured with Euclidean distance—and
+      updating centroid positions until convergence.
+    </Typography>
+    <Typography
+      variant="h5"
+      gutterBottom
+      sx={{ pl: 2, color: "#d32f2f", fontWeight: 700 }}
+    >
+      • Users <em>must manually select</em> the number of clusters (
+      <InlineMath math="k" />) <em>in advance</em>, which directly influences
+      the clustering outcome.
+    </Typography>
+    <Typography
+      variant="h5"
+      gutterBottom
+      sx={{ pl: 2, color: "#d32f2f", fontWeight: 700 }}
+    >
+      • Users can <em>define the distance metric</em> (e.g., L2, L1), and this
+      choice shapes the resulting cluster boundaries.
+    </Typography>
+  </Fragment>
+);
 
-/** Generate uniformly-spaced circle boundary points */
+/**
+ * ▼▼▼  EXPANDED & PARAM-HIGHLIGHTED DBSCAN CONTENT  ▼▼▼
+ */
+const DBSCAN_CONTENT = (
+  <Box>
+    {/* Heading */}
+    <Typography variant="subtitle2" gutterBottom>
+      DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+    </Typography>
+
+    {/* Main bullet list */}
+    <Box component="ul" sx={{ pl: 3, m: 0, listStyle: "disc" }}>
+      <Typography component="li" variant="h5" gutterBottom>
+        DBSCAN is a <strong>density-based</strong> clustering algorithm that
+        groups together points packed closely (high-density regions) and marks
+        points in sparse regions as outliers.
+      </Typography>
+
+      <Typography component="li" variant="h5" gutterBottom>
+        Unlike K-Means, DBSCAN {" "}
+        <strong>does not require the number of clusters</strong> (
+        <InlineMath math="k" />) to be specified beforehand and can discover
+        clusters of varying shapes.
+      </Typography>
+
+      <Typography component="li" variant="h5" gutterBottom>
+        It identifies <em>core points</em>—points that have enough neighbors
+        within a radius—and expands clusters by recursively visiting
+        density-reachable points.
+      </Typography>
+
+      {/* Hyper-parameter subsection */}
+      <Typography component="li" variant="h5" gutterBottom>
+        Two <strong style={{ color: "#d32f2f" }}>user-tunable</strong>{" "}
+        hyper-parameters control what DBSCAN considers “dense enough”:
+        <Box
+          component="ul"
+          sx={{
+            pl: 3,
+            mt: 1,
+            listStyle: "circle",
+            color: "#d32f2f",
+            fontWeight: 700,
+          }}
+        >
+          <Typography component="li" variant="h5" gutterBottom>
+            <InlineMath math="\varepsilon" /> (<code>eps</code>): neighborhood
+            radius around a point
+          </Typography>
+          <Typography component="li" variant="h5" gutterBottom>
+            MinPoints (<InlineMath math="\text{MinPts}" />
+            ): minimum neighbors within <InlineMath math="\varepsilon" /> to
+            qualify a point as <em>core</em>
+          </Typography>
+        </Box>
+      </Typography>
+
+      <Typography component="li" variant="h5" gutterBottom>
+        Choosing <InlineMath math="\varepsilon" /> and MinPoints well is
+        critical; practitioners often use a <em>k-distance plot</em> to find a
+        knee point that balances noise removal and cluster granularity.
+      </Typography>
+
+      <Typography component="li" variant="h5" gutterBottom>
+        <strong>Pros:</strong> detects arbitrary-shaped clusters, handles
+        noise automatically.
+      </Typography>
+
+      <Typography component="li" variant="h5" gutterBottom>
+        <strong>Cons:</strong> struggles with clusters of varying density and
+        high-dimensional data where distance metrics become less meaningful.
+      </Typography>
+    </Box>
+  </Box>
+);
+/** Generate uniformly‑spaced circle boundary points */
 const generateCirclePoints = (
   cx: number,
   cy: number,
@@ -73,13 +196,13 @@ const MathInline: React.FC<{ formula: string }> = ({ formula }) => (
     <InlineMath math={formula} />
   </Box>
 );
-const SECTION_SIZE = 700; // drawing canvas size
+
 // ────────────────── Fixed EXAMPLE points ──────────────────
 const P1 = { x: 1, y: 2 } as const;
 const P2 = { x: 4, y: 6 } as const;
 const HIGHLIGHT = "#1976d2";
 
-// ────────────────── Helper to compute distances ──────────────────
+// ────────── Helper to compute distances ──────────
 const calcDistance = (a: Point, b: Point, norm: NormKey): number => {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
@@ -127,7 +250,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
     }
   }, [correctFlags, onComplete]);
 
-  // ────────── Metric-specific quiz point pairs (different from example) ──────────
+  // ────────── Metric‑specific quiz point pairs ──────────
   const QUIZ_POINTS = useMemo<Record<NormKey, { A: Point; B: Point }>>(
     () => ({
       L1: { A: { x: 2, y: 5 }, B: { x: 6, y: 1 } },
@@ -158,7 +281,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
       dataset1: {
         name: "Gaussian Blobs",
         description:
-          "Two well-separated Gaussian-like blobs that illustrate simple, convex clusters.",
+          "Two well‑separated Gaussian‑like blobs that illustrate simple, convex clusters.",
         clusters: [
           { points: generateCirclePoints(1, 1, 1.2, 60) },
           { points: generateCirclePoints(5, 5, 1.2, 60) },
@@ -167,7 +290,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
       dataset2: {
         name: "Concentric Circles",
         description:
-          "Concentric rings sharing a centroid but differing in radius, representing non-linear cluster structure.",
+          "Concentric rings sharing a centroid but differing in radius, representing non‑linear cluster structure.",
         clusters: [
           { points: generateCirclePoints(0, 0, 1.5, 120) },
           { points: generateCirclePoints(0, 0, 3, 120) },
@@ -179,7 +302,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
 
   const currentDataset = DATASETS[datasetKey];
 
-  // ────────── Worked-example distances ──────────
+  // ────────── Worked‑example distances ──────────
   const EXAMPLE_DISTANCES = useMemo<Record<NormKey, number>>(
     () => ({
       L1: calcDistance(P1, P2, "L1"),
@@ -198,11 +321,11 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
 
   const NORM_DESCRIPTIONS: Record<NormKey, string> = {
     L1: "L1 (Manhattan) distance sums absolute coordinate differences.",
-    L2: "L2 (Euclidean) distance is the straight-line length between points.",
+    L2: "L2 (Euclidean) distance is the straight‑line length between points.",
     "L∞": "L∞ (Chebyshev) distance takes the maximum absolute coordinate difference.",
   };
 
-  // ────────── Pre-computed line-segment paths for illustration ──────────
+  // ────────── Pre‑computed line‑segment paths for illustration ──────────
   const NORM_PATHS = useMemo<
     Record<NormKey, { pts: Point[]; stroke: string }[]>
   >(() => {
@@ -227,115 +350,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
   }, []);
 
   // ────────── Content blocks for Method section ──────────
-  const KMEANS_CONTENT = (
-    <Fragment>
-      <Typography variant="subtitle2" gutterBottom>
-        K-Means Overview
-      </Typography>
-      <Typography variant="body1" gutterBottom sx={{ pl: 2 }}>
-        • K-Means is an <strong>unsupervised</strong> clustering algorithm that
-        partitions data points into <InlineMath math="k" /> clusters.
-      </Typography>
-      <Typography variant="body1" gutterBottom sx={{ pl: 2 }}>
-        • It groups data points by repeatedly assigning each point to the
-        nearest cluster centroid—typically measured with Euclidean distance—and
-        updating centroid positions until convergence.
-      </Typography>
-      <Typography
-        variant="body1"
-        gutterBottom
-        sx={{ pl: 2, color: "#d32f2f", fontWeight: 700 }}
-      >
-        • Users <em>must manually select</em> the number of clusters (
-        <InlineMath math="k" />) <em>in advance</em>, which directly influences
-        the clustering outcome.
-      </Typography>
-      <Typography
-        variant="body1"
-        gutterBottom
-        sx={{ pl: 2, color: "#d32f2f", fontWeight: 700 }}
-      >
-        • Users can <em>define the distance metric</em> (e.g., L2, L1), and this
-        choice shapes the resulting cluster boundaries.
-      </Typography>
-    </Fragment>
-  );
-
-  /**
-   * ▼▼▼  EXPANDED & PARAM-HIGHLIGHTED DBSCAN CONTENT  ▼▼▼
-   */
-  const DBSCAN_CONTENT = (
-    <Box>
-      {/* Heading */}
-      <Typography variant="subtitle2" gutterBottom>
-        DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
-      </Typography>
-
-      {/* Main bullet list */}
-      <Box component="ul" sx={{ pl: 3, m: 0, listStyle: "disc" }}>
-        <Typography component="li" variant="body1" gutterBottom>
-          DBSCAN is a <strong>density-based</strong> clustering algorithm that
-          groups together points packed closely (high-density regions) and marks
-          points in sparse regions as outliers.
-        </Typography>
-
-        <Typography component="li" variant="body1" gutterBottom>
-          Unlike K-Means, DBSCAN {" "}
-          <strong>does not require the number of clusters</strong> (
-          <InlineMath math="k" />) to be specified beforehand and can discover
-          clusters of varying shapes.
-        </Typography>
-
-        <Typography component="li" variant="body1" gutterBottom>
-          It identifies <em>core points</em>—points that have enough neighbors
-          within a radius—and expands clusters by recursively visiting
-          density-reachable points.
-        </Typography>
-
-        {/* Hyper-parameter subsection */}
-        <Typography component="li" variant="body1" gutterBottom>
-          Two <strong style={{ color: "#d32f2f" }}>user-tunable</strong>{" "}
-          hyper-parameters control what DBSCAN considers “dense enough”:
-          <Box
-            component="ul"
-            sx={{
-              pl: 3,
-              mt: 1,
-              listStyle: "circle",
-              color: "#d32f2f",
-              fontWeight: 700,
-            }}
-          >
-            <Typography component="li" variant="body1" gutterBottom>
-              <InlineMath math="\varepsilon" /> (<code>eps</code>): neighborhood
-              radius around a point
-            </Typography>
-            <Typography component="li" variant="body1" gutterBottom>
-              MinPoints (<InlineMath math="\text{MinPts}" />
-              ): minimum neighbors within <InlineMath math="\varepsilon" /> to
-              qualify a point as <em>core</em>
-            </Typography>
-          </Box>
-        </Typography>
-
-        <Typography component="li" variant="body1" gutterBottom>
-          Choosing <InlineMath math="\varepsilon" /> and MinPoints well is
-          critical; practitioners often use a <em>k-distance plot</em> to find a
-          knee point that balances noise removal and cluster granularity.
-        </Typography>
-
-        <Typography component="li" variant="body1" gutterBottom>
-          <strong>Pros:</strong> detects arbitrary-shaped clusters, handles
-          noise automatically.
-        </Typography>
-
-        <Typography component="li" variant="body1" gutterBottom>
-          <strong>Cons:</strong> struggles with clusters of varying density and
-          high-dimensional data where distance metrics become less meaningful.
-        </Typography>
-      </Box>
-    </Box>
-  );
+  // ... (KMEANS_CONTENT and DBSCAN_CONTENT unchanged)
 
   // ────────── Quiz UI component ──────────
   const QuizBlock: React.FC<{ norm: NormKey }> = ({ norm }) => {
@@ -390,7 +405,8 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
     switch (section) {
       case "Dataset":
         return (
-          <Fragment>
+          <Box sx={{ width: 1, height: SECTION_HEIGHT, overflow: "hidden" }}>
+            {/* Dataset section content */}
             <Typography variant="h5" gutterBottom>
               Interactive Dataset Playground
             </Typography>
@@ -407,34 +423,43 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {currentDataset.name}
             </Typography>
-            <Typography variant="body1" paragraph sx={{ pl: 2 }}>
+            <Typography variant="h5" paragraph sx={{ pl: 2 }}>
               {currentDataset.description}
             </Typography>
-            <Box sx={{ width: 700, height: 700 }}>
-              <ResponsiveContainer width="100%" aspect={1}>
+            <Box sx={{ width: 1 }}>
+              {/* CHART SHRUNK TO 90 % WIDTH */}
+              <ResponsiveContainer width={CHART_WIDTH_PERCENT} aspect={1}>
                 <ComposedChart
                   margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" dataKey="x" domain={["auto", "auto"]} />
-                  <YAxis type="number" dataKey="y" domain={["auto", "auto"]} />
+                  {/* Smaller‑looking axes via fontSize */}
+                  <XAxis
+                    type="number"
+                    dataKey="x"
+                    domain={["auto", "auto"]}
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="y"
+                    domain={["auto", "auto"]}
+                    tick={{ fontSize: 10 }}
+                  />
                   <Tooltip cursor={{ strokeDasharray: "3 3" }} />
                   {currentDataset.clusters.map((c, idx) => (
-                    <Scatter
-                      key={idx}
-                      data={c.points}
-                      name={`Cluster ${idx + 1}`}
-                    />
+                    <Scatter key={idx} data={c.points} name={`Cluster ${idx + 1}`} />
                   ))}
                 </ComposedChart>
               </ResponsiveContainer>
             </Box>
-          </Fragment>
+          </Box>
         );
 
       case "Method":
         return (
-          <Fragment>
+          <Box sx={{ width: 1, height: SECTION_HEIGHT, overflow: "hidden" }}>
+            {/* Method section content */}
             <Typography variant="h5" gutterBottom>
               Clustering Algorithms
             </Typography>
@@ -448,22 +473,14 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
               <ToggleButton value="KMeans">K-Means</ToggleButton>
               <ToggleButton value="DBSCAN">DBSCAN</ToggleButton>
             </ToggleButtonGroup>
-            <Box
-              sx={{
-                width: SECTION_SIZE,
-                height: SECTION_SIZE,
-                overflowY: "auto", // 内容多时可滚动
-                pr: 1, // 出现滚动条时不挡文字
-              }}
-            >
-              {methodKey === "KMeans" ? KMEANS_CONTENT : DBSCAN_CONTENT}
-            </Box>
-          </Fragment>
+            <Box sx={{ width: 1, pr: 1 }}>{methodKey === "KMeans" ? KMEANS_CONTENT : DBSCAN_CONTENT}</Box>
+          </Box>
         );
 
       case "Metrics":
         return (
-          <Fragment>
+          <Box sx={{ width: 1, height: SECTION_HEIGHT, overflow: "hidden" }}>
+            {/* Metrics section content */}
             <Typography variant="h5" gutterBottom>
               Distance Metrics – Geometric Illustration
             </Typography>
@@ -483,33 +500,38 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
                 {NORM_DESCRIPTIONS[normKey]}
               </Typography>
               <BlockMath math={NORM_FORMULAE[normKey]} />
-              <Typography variant="body1">
-                <strong>Worked example:</strong> Let P<sub>1</sub> = (1, 2), P<sub>2</sub> = (4, 6). Then 
+              <Typography variant="h5">
+                <strong>Worked example:</strong> Let P<sub>1</sub> = (1, 2), P<sub>2</sub> = (4, 6). Then
                 <InlineMath math={`d(P_{1},P_{2}) = ${EXAMPLE_DISTANCES[normKey].toFixed(3)}`} />
               </Typography>
             </Stack>
-            {/* Layout modified: chart on left, quiz on right */}
             <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start" }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box sx={{ width: "100%", height: SECTION_SIZE }}>
-                  <ResponsiveContainer width="100%" aspect={1}>
+                <Box sx={{ width: 1 }}>
+                  {/* Chart shrunk to 90 % */}
+                  <ResponsiveContainer width={CHART_WIDTH_PERCENT} aspect={1}>
                     <ComposedChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" dataKey="x" domain={[0, 7]} ticks={[0,1,2,3,4,5,6,7]} />
-                      <YAxis type="number" dataKey="y" domain={[0, 7]} ticks={[0,1,2,3,4,5,6,7]} />
+                      <XAxis
+                        type="number"
+                        dataKey="x"
+                        domain={[0, 7]}
+                        ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <YAxis
+                        type="number"
+                        dataKey="y"
+                        domain={[0, 7]}
+                        ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
+                        tick={{ fontSize: 10 }}
+                      />
                       <Tooltip cursor={{ strokeDasharray: "3 3" }} />
                       {/* Points */}
                       <Scatter name="Points" data={[P1, P2]} fill="#d32f2f" />
-                      {/* Norm-specific paths */}
+                      {/* Norm‑specific paths */}
                       {NORM_PATHS[normKey].map((seg, idx) => (
-                        <Line
-                          key={idx}
-                          data={seg.pts}
-                          dataKey="y"
-                          stroke={seg.stroke}
-                          strokeWidth={3}
-                          dot={false}
-                        />
+                        <Line key={idx} data={seg.pts} dataKey="y" stroke={seg.stroke} strokeWidth={3} dot={false} />
                       ))}
                     </ComposedChart>
                   </ResponsiveContainer>
@@ -517,7 +539,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
               </Box>
               <QuizBlock norm={normKey} />
             </Box>
-          </Fragment>
+          </Box>
         );
       default:
         return null;
@@ -532,8 +554,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
         bgcolor: "#e9e9e9",
         borderRadius: 6,
         border: "2px solid #0b2538",
-        width: "100%",
-        maxWidth: 1200,
+        width: "1300px",
         mx: "auto",
       }}
     >
@@ -547,7 +568,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
         </Typography>
       </Alert>
 
-      <Box sx={{ display: "flex", gap: 3, minHeight: 540 }}>
+      <Box sx={{ display: "flex", gap: 3 }}>
         <Stack spacing={3} width={170}>
           {NAV_ITEMS.map((item) => (
             <Button
@@ -560,8 +581,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
                 fontSize: "1rem",
                 borderWidth: 2,
                 borderColor: "#102338",
-                backgroundColor:
-                  active === item ? "#d4e0ff" : "rgba(255,255,255,0.6)",
+                backgroundColor: active === item ? "#d4e0ff" : "rgba(255,255,255,0.6)",
                 color: "#102338",
                 ":hover": { backgroundColor: "#d4e0ff" },
               }}
@@ -570,6 +590,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
             </Button>
           ))}
         </Stack>
+        {/* Removed overflowY:auto to eliminate scrollbars */}
         <Paper
           elevation={6}
           sx={{
@@ -580,7 +601,6 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
             backgroundColor: "#fafafa",
             display: "flex",
             flexDirection: "column",
-            overflowY: "auto",
           }}
         >
           {renderSection(active)}
