@@ -363,7 +363,7 @@ const AdvancedLesson: React.FC = () => {
         <Typography variant="h6">Advanced Clustering Playground</Typography>
       </Stack>
       <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
-        <Typography variant="body1" gutterBottom>
+        <Typography variant="body2" gutterBottom>
           This interactive playground lets you experiment with clustering
           algorithms on two toy datasets: Gaussian blobs and concentric circles.
           Select either K-Means or DBSCAN, choose a distance metric (L1, L2, or

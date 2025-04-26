@@ -40,7 +40,8 @@ const NAV_ITEMS = ["Dataset", "Method", "Metrics"] as const;
 const SECTION_HEIGHT = 1040; // px – matches the previous minHeight to avoid layout shift
 
 /** Proportional shrink factor applied to chart width so the axes look smaller. */
-const CHART_WIDTH_PERCENT = "90%"; // 100 % → 90 %
+const CHART_WIDTH_PERCENT = "95%"; // 100 % → 90 %
+const  CHART_WIDTH_PERCENT2  = "80%";
 
 // ───────────────────────────────────────
 
@@ -428,7 +429,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
             </Typography>
             <Box sx={{ width: 1 }}>
               {/* CHART SHRUNK TO 90 % WIDTH */}
-              <ResponsiveContainer width={CHART_WIDTH_PERCENT} aspect={1}>
+              <ResponsiveContainer width={CHART_WIDTH_PERCENT2} aspect={1}>
                 <ComposedChart
                   margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                 >
