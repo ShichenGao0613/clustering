@@ -10,6 +10,8 @@ import {
   ToggleButtonGroup,
   TextField,
   Alert,
+  Snackbar,
+  Collapse,
 } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import {
@@ -244,12 +246,28 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
   >({ L1: false, L2: false, "L∞": false });
   const tolerance = 1e-2; // Accept answers within ±0.01
 
+  const [result, setResult] = useState<{
+    attempted: boolean;
+    success: boolean;
+    correctCount: number;
+  }>({ attempted: false, success: false, correctCount: 0 });
+  const [congratsOpen, setCongratsOpen] = useState(false);
+
+  // 每次 correctFlags 变化时，更新 result；全部正确时弹出提示并触发 onComplete
   useEffect(() => {
-    const allOk = correctFlags.L1 && correctFlags.L2 && correctFlags["L∞"];
-    if (allOk) {
-      onComplete?.();
+    const count = Object.values(correctFlags).filter((v) => v).length;
+    const allOk = count === Object.keys(correctFlags).length;
+    if (Object.values(attemptedFlags).some((v) => v)) {
+      setResult({ attempted: true, success: allOk, correctCount: count });
+      if (allOk) {
+        setCongratsOpen(true);
+        setTimeout(() => {
+          setCongratsOpen(false);
+          onComplete?.();
+        }, 2500);
+      }
     }
-  }, [correctFlags, onComplete]);
+  }, [correctFlags, attemptedFlags, onComplete]);
 
   // ────────── Metric‑specific quiz point pairs ──────────
   const QUIZ_POINTS = useMemo<Record<NormKey, { A: Point; B: Point }>>(
@@ -605,6 +623,30 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
           }}
         >
           {renderSection(active)}
+          <Collapse in={result.attempted} sx={{ mt: 3 }}>
+            <Alert
+              severity={result.success ? "success" : "warning"}
+              variant="filled"
+              icon={false}
+              sx={{ fontWeight: 600, justifyContent: "center" }}
+            >
+              {result.success
+                ? "All metrics correctly answered! 🎉"
+                : `${result.correctCount}/3 metrics correct. Keep going.`}
+            </Alert>
+          </Collapse>
+
+          {/* 🎉 新增：Congratulations Snackbar */}
+          <Snackbar
+            open={congratsOpen}
+            autoHideDuration={2500}
+            onClose={() => setCongratsOpen(false)}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert severity="success" variant="filled" sx={{ width: "100%" }}>
+              Congratulations! You've successfully completed this lesson! 🎉
+            </Alert>
+          </Snackbar>
         </Paper>
       </Box>
     </Paper>
