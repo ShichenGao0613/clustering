@@ -28,7 +28,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4 }}>
+    <Container maxWidth={false} sx={{ mt: 4 }}>
       {/* Title */}
       <Typography variant="h4" align="center" gutterBottom>
         Learning Tool of Clustering

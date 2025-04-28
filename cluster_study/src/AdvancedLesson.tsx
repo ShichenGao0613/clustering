@@ -360,7 +360,7 @@ const AdvancedLesson: React.FC = () => {
     >
       <Stack direction="row" alignItems="center" spacing={1} mb={3}>
         <MenuBookIcon fontSize="large" />
-        <Typography variant="h6">Advanced Clustering Playground</Typography>
+        <Typography variant="h6">Advanced Lesson</Typography>
       </Stack>
       <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
         <Typography variant="body2" gutterBottom>

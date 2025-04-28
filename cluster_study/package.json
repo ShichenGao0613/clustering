@@ -1,4 +1,5 @@
 {
+  "homepage": "https://ShichenGao0613.github.io/clustering",
   "name": "cluster_study",
   "version": "0.1.0",
   "private": true,
@@ -21,10 +22,13 @@
     "react-dom": "^19.1.0",
     "react-katex": "^3.0.1",
     "react-scripts": "5.0.1",
+    "recharts": "^2.15.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",     
+    "deploy": "gh-pages -d build", 
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -50,6 +54,7 @@
   },
   "devDependencies": {
     "@types/katex": "^0.16.7",
-    "@types/react-katex": "^3.0.4"
+    "@types/react-katex": "^3.0.4",
+    "gh-pages": "^6.3.0"
   }
 }
