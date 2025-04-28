@@ -564,7 +564,15 @@ const AdvancedLesson: React.FC = () => {
                       onChange={() => toggleRunVisibility(run.id)}
                       sx={{ p: 0.5 }}
                     />
-                    <Typography variant="body2" sx={{ flex: 1 }} noWrap>
+                    
+                     <Typography
+ variant="body2"
+   sx={{
+   flex: 1,
+   whiteSpace: 'normal',
+   wordBreak: 'break-word',      // break long words
+    overflowWrap: 'break-word',   // wrap at boundaries
+  }} >
                       {`${run.method} (${run.paramsDesc}, ${run.norm})`}
                     </Typography>
                     <IconButton size="small" onClick={() => deleteRun(run.id)}>
