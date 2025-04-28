@@ -27,13 +27,12 @@ import {
 
 /* ─────────────────────────── Types ─────────────────────────── */
 const COLORS = [
-  "#1976d2",
-  "#d32f2f",
-  "#388e3c",
-  "#fbc02d",
-  "#7b1fa2",
-  "#0097a7",
-  "#5d4037",
+  /* Tableau 10 */
+  "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
+  "#EDC949", "#AF7AA1", "#FF9DA7", "#9C755F", "#BAB0AC",
+  /* Tableau 20 */
+  "#1F77B4", "#AEC7E8", "#FF7F0E", "#FFBB78", "#2CA02C",
+  "#98DF8A", "#D62728", "#FF9896", "#9467BD", "#C5B0D5"
 ];
 
 export type MethodKey = "KMeans" | "DBSCAN";
