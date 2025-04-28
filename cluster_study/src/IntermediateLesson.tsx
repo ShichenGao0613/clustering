@@ -12,6 +12,8 @@ import {
   Alert,
   Snackbar,
   Collapse,
+  Card,
+  CardContent,
 } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import {
@@ -69,6 +71,33 @@ interface Point {
 interface Cluster {
   points: Point[];
 }
+// 放到文件顶部附近
+const PointTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+
+  // Display only Scatter point coordinates
+  const point = payload.find((p: any) => p.payload?.x !== undefined);
+  if (!point) return null;
+
+  const { x, y } = point.payload;
+
+  return (
+    <Card elevation={4} sx={{ bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 2 }}>
+      <CardContent sx={{ py: 1, px: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+          Coordinates
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          x: <strong>{x}</strong>
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          y: <strong>{y}</strong>
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+};
+
 const KMEANS_CONTENT = (
   <Fragment>
     <Typography variant="subtitle2" gutterBottom>
@@ -465,7 +494,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
                     domain={["auto", "auto"]}
                     tick={{ fontSize: 10 }}
                   />
-                  <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                  <Tooltip content={<PointTooltip />} />
                   {currentDataset.clusters.map((c, idx) => (
                     <Scatter key={idx} data={c.points} name={`Cluster ${idx + 1}`} />
                   ))}
@@ -545,12 +574,12 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
                         ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
                         tick={{ fontSize: 10 }}
                       />
-                      <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                      <Tooltip content={<PointTooltip />} />
                       {/* Points */}
                       <Scatter name="Points" data={[P1, P2]} fill="#d32f2f" />
                       {/* Norm‑specific paths */}
                       {NORM_PATHS[normKey].map((seg, idx) => (
-                        <Line key={idx} data={seg.pts} dataKey="y" stroke={seg.stroke} strokeWidth={3} dot={false} />
+                        <Line key={idx} data={seg.pts} dataKey="y" stroke={seg.stroke} strokeWidth={3} dot={false} tooltipType="none"  legendType="none"  />
                       ))}
                     </ComposedChart>
                   </ResponsiveContainer>
