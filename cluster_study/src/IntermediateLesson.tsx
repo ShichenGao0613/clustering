@@ -259,6 +259,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
   const [normKey, setNormKey] = useState<NormKey>("L1");
 
   /** ────────────── Quiz state ────────────── */
+  const [lastIsCorrect, setLastIsCorrect] = useState<boolean | null>(null);
   const [unlockedNorms, setUnlockedNorms] = useState<NormKey[]>(["L1"]);
   const [quizInputs, setQuizInputs] = useState<Record<NormKey, string>>({
     L1: "",
@@ -315,6 +316,7 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
     const isOk = Math.abs(userVal - truth) <= tolerance;
     setCorrectFlags((prev) => ({ ...prev, [key]: isOk }));
     setAttemptedFlags((prev) => ({ ...prev, [key]: true }));
+    setLastIsCorrect(isOk);
     if (isOk) {
       if (key === "L1" && !unlockedNorms.includes("L2"))
         setUnlockedNorms((prev) => [...prev, "L2"]);
@@ -653,19 +655,25 @@ const IntermediateLesson: React.FC<IntermediateLessonProps> = ({
         >
           {renderSection(active)}
           <Collapse in={result.attempted} sx={{ mt: 3 }}>
-            <Alert
-              severity={result.success ? "success" : "warning"}
-              variant="filled"
-              icon={false}
-              sx={{ fontWeight: 600, justifyContent: "center" }}
-            >
+          <Alert
+  severity={
+    lastIsCorrect === null      // 还没做任何题 → 默认黄
+      ? "warning"
+      : lastIsCorrect
+        ? "success"             // 刚做的那题对了 → 绿色
+        : "warning"             // 刚做的那题错了 → 黄色
+  }
+  variant="filled"
+  icon={false}
+  sx={{ fontWeight: 600, justifyContent: "center" }}
+>
               {result.success
                 ? "All metrics correctly answered! 🎉"
                 : `${result.correctCount}/3 metrics correct. Keep going.`}
             </Alert>
           </Collapse>
 
-          {/* 🎉 新增：Congratulations Snackbar */}
+        
           <Snackbar
             open={congratsOpen}
             autoHideDuration={2500}
